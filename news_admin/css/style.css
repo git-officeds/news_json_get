@@ -314,19 +314,19 @@ input[type="button"]:focus-visible{
     background-color: #f9fbfc;
 }
 
-/* 列幅の調整 */
+/* 列幅の調整（詳細行は colspan のため除外） */
 #news_list th:nth-child(1),
-#news_list td:nth-child(1){
+#news_list tr:not(.detail-row) td:nth-child(1){
     width: 88px;
     text-align: center;
 }
 #news_list th:nth-child(2),
-#news_list td:nth-child(2){
+#news_list tr:not(.detail-row) td:nth-child(2){
     width: 60px;
     text-align: center;
 }
 #news_list th:nth-child(3),
-#news_list td:nth-child(3){
+#news_list tr:not(.detail-row) td:nth-child(3){
     width: 170px;
 }
 
@@ -384,10 +384,140 @@ input[type="button"]:focus-visible{
 }
 
 #news_list input[type="date"]:focus,
-#news_list textarea[name="content"]:focus{
+#news_list textarea[name="content"]:focus,
+#news_list textarea[name="text"]:focus{
     outline: none;
     border-color: #3498db;
     box-shadow: 0 0 0 3px rgba(52, 152, 219, .15);
+}
+
+/* ----- 詳細本文（text）の開閉トグル ----- */
+#news_list .content-cell{
+    /* textarea とトグルを縦に並べる */
+}
+
+#news_list .detail-toggle{
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: 6px;
+    padding: 3px 10px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #55606b;
+    background-color: #eef2f5;
+    border: 1px solid #d7dee4;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: background-color .15s ease, color .15s ease, border-color .15s ease;
+}
+
+#news_list .detail-toggle:hover{
+    background-color: #e2e8ee;
+    color: #2c3e50;
+}
+
+#news_list .detail-toggle__mark{
+    display: inline-block;
+    width: 1em;
+    text-align: center;
+    font-weight: 700;
+    line-height: 1;
+}
+#news_list .detail-toggle__mark::before{
+    content: "\ff0b";                       /* ＋ */
+}
+#news_list .detail-toggle[aria-expanded="true"] .detail-toggle__mark::before{
+    content: "\2212";                       /* − */
+}
+
+/* 詳細本文が入力済みのとき: 印を付ける */
+#news_list .detail-toggle--filled{
+    color: #1e6b3a;
+    background-color: #e6f4ea;
+    border-color: #bfe2ca;
+}
+#news_list .detail-toggle--filled::after{
+    content: "";
+    width: 6px;
+    height: 6px;
+    margin-left: 1px;
+    border-radius: 50%;
+    background-color: #27ae60;
+}
+
+/* ----- 詳細本文の入力行（スムーズ開閉） ----- */
+#news_list tr.detail-row td{
+    padding: 0;
+    background-color: #f9fbfc;
+    border-bottom: none;
+}
+
+#news_list tr.detail-row.is-open td{
+    border-bottom: 1px solid #edf1f3;
+}
+
+/* grid-template-rows: 0fr → 1fr で高さをアニメーション */
+#news_list .detail-row__collapse{
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows .28s ease;
+}
+
+#news_list tr.detail-row.is-open .detail-row__collapse{
+    grid-template-rows: 1fr;
+}
+
+#news_list .detail-row__inner{
+    overflow: hidden;
+    min-height: 0;
+    padding: 0 10px;
+    opacity: 0;
+    transition: opacity .2s ease, padding .28s ease;
+}
+
+#news_list tr.detail-row.is-open .detail-row__inner{
+    padding: 2px 10px 14px;
+    opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce){
+    #news_list .detail-row__collapse,
+    #news_list .detail-row__inner,
+    #news_list .detail-toggle,
+    #news_list .detail-toggle__mark::before{
+        transition: none;
+    }
+}
+
+#news_list .detail-field{
+    display: block;
+    padding: 12px;
+    background-color: #fff;
+    border: 1px solid #e1e6ea;
+    border-radius: 4px;
+}
+
+#news_list .detail-field__label{
+    display: block;
+    margin-bottom: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #55606b;
+}
+
+#news_list textarea[name="text"]{
+    width: 100%;
+    min-height: 90px;
+    padding: 8px 10px;
+    font-size: 14px;
+    font-family: inherit;
+    line-height: 1.6;
+    color: #333;
+    background-color: #fff;
+    border: 1px solid #cfd8df;
+    border-radius: 4px;
+    resize: vertical;
 }
 
 /* ----- フッター ----- */

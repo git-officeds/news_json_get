@@ -68,28 +68,79 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    // 日付・内容フィールドが変更されたら保存ボタンを有効化（イベント委譲）
+    /**
+     * 主行に対応する詳細行（次の兄弟の .detail-row）を返す
+     * @param {HTMLTableRowElement} mainRow
+     * @returns {HTMLTableRowElement|null}
+     */
+    function detailRowOf(mainRow) {
+        var next = mainRow.nextElementSibling;
+        return (next && next.classList.contains('detail-row')) ? next : null;
+    }
+
+    /**
+     * 詳細トグルの「入力済み」表示を更新する
+     * @param {HTMLTableRowElement} mainRow
+     */
+    function refreshDetailToggle(mainRow) {
+        var toggle = mainRow.querySelector('.detail-toggle');
+        var detail = detailRowOf(mainRow);
+        if (!toggle || !detail) return;
+        var ta = detail.querySelector('textarea[name="text"]');
+        var filled = !!(ta && ta.value.trim() !== '');
+        toggle.classList.toggle('detail-toggle--filled', filled);
+    }
+
+    // 日付・内容・詳細フィールドが変更されたら保存ボタンを有効化（イベント委譲）
     tbody.addEventListener('input', function (e) {
         var t = e.target;
-        if (t && (t.name === 'last_update' || t.name === 'content')) {
+        if (!t) return;
+        if (t.name === 'last_update' || t.name === 'content' || t.name === 'text') {
             enableSubmit();
             showMessage('', '');
+            if (t.name === 'text') {
+                var detailRow = t.closest('tr.detail-row');
+                if (detailRow && detailRow.previousElementSibling) {
+                    refreshDetailToggle(detailRow.previousElementSibling);
+                }
+            }
         }
     });
 
-    // 削除ボタン（name="delete"）: 該当の行を削除（イベント委譲）
+    // 詳細トグル: クリックで詳細本文の textarea を開閉（イベント委譲）
+    tbody.addEventListener('click', function (e) {
+        var toggle = e.target.closest('.detail-toggle');
+        if (!toggle) return;
+
+        var mainRow = toggle.closest('tr');
+        var detail  = mainRow ? detailRowOf(mainRow) : null;
+        if (!detail) return;
+
+        var open = !detail.classList.contains('is-open');   // これから開くか
+        detail.classList.toggle('is-open', open);
+        toggle.setAttribute('aria-expanded', String(open));
+
+        if (open) {
+            var ta = detail.querySelector('textarea[name="text"]');
+            if (ta) ta.focus();
+        }
+    });
+
+    // 削除ボタン（name="delete"）: 該当の行（＋詳細行）を削除（イベント委譲）
     tbody.addEventListener('click', function (e) {
         var btn = e.target.closest('button[name="delete"]');
         if (!btn) return;
 
         var row = btn.closest('tr');
         if (row) {
+            var detail = detailRowOf(row);
+            if (detail) detail.remove();
             row.remove();
             enableSubmit();
         }
     });
 
-    // 「選択した項目を削除」: チェックされている行をすべて削除
+    // 「選択した項目を削除」: チェックされている行（＋詳細行）をすべて削除
     if (delBtn) {
         delBtn.addEventListener('click', function () {
             var checked = tbody.querySelectorAll('input[type="checkbox"][name="select"]:checked');
@@ -97,50 +148,78 @@ document.addEventListener('DOMContentLoaded', function () {
 
             checked.forEach(function (cb) {
                 var row = cb.closest('tr');
-                if (row) row.remove();
+                if (!row) return;
+                var detail = detailRowOf(row);
+                if (detail) detail.remove();
+                row.remove();
             });
             enableSubmit();
         });
     }
 
     /**
-     * 空の1行を生成して返す
-     * @returns {HTMLTableRowElement}
+     * 空の主行＋詳細行を生成して返す
+     * @returns {{ main: HTMLTableRowElement, detail: HTMLTableRowElement }}
      */
     function createEmptyRow() {
-        var tr = document.createElement('tr');
-        tr.innerHTML =
+        var main = document.createElement('tr');
+        main.innerHTML =
             '<td><input type="checkbox" name="select"></td>' +
             '<td><button type="button" name="delete"><img src="./images/trush.png" alt="削除"></button></td>' +
             '<td><input type="date" name="last_update" value=""></td>' +
-            '<td><textarea name="content"></textarea></td>';
-        return tr;
+            '<td class="content-cell">' +
+                '<textarea name="content"></textarea>' +
+                '<button type="button" class="detail-toggle" aria-expanded="false" title="詳細本文を編集">' +
+                    '<span class="detail-toggle__mark" aria-hidden="true"></span>詳細' +
+                '</button>' +
+            '</td>';
+
+        var detail = document.createElement('tr');
+        detail.className = 'detail-row';
+        detail.innerHTML =
+            '<td colspan="4">' +
+                '<div class="detail-row__collapse">' +
+                    '<div class="detail-row__inner">' +
+                        '<label class="detail-field">' +
+                            '<span class="detail-field__label">詳細本文</span>' +
+                            '<textarea name="text" rows="4" placeholder="お知らせの詳細（本文）を入力"></textarea>' +
+                        '</label>' +
+                    '</div>' +
+                '</div>' +
+            '</td>';
+
+        return { main: main, detail: detail };
     }
 
-    // 「項目を追加」: テーブルの1行目に空行を差し込む
+    // 「項目を追加」: テーブルの1行目に空行（主行＋詳細行）を差し込む
     addBtn.addEventListener('click', function () {
-        var row = createEmptyRow();
-        tbody.insertBefore(row, tbody.firstElementChild);
+        var pair = createEmptyRow();
+        var first = tbody.firstElementChild;
+        tbody.insertBefore(pair.main, first);
+        tbody.insertBefore(pair.detail, first);
         enableSubmit();
         showMessage('', '');
 
         // 入力しやすいよう日付欄にフォーカス
-        var dateInput = row.querySelector('input[name="last_update"]');
+        var dateInput = pair.main.querySelector('input[name="last_update"]');
         if (dateInput) dateInput.focus();
     });
 
     /**
      * 現在のテーブル内容をレコード配列にまとめる
-     * @returns {Array<{date:string, title:string}>}
+     * @returns {Array<{date:string, title:string, text:string}>}
      */
     function collectRecords() {
         var records = [];
-        tbody.querySelectorAll('tr').forEach(function (row) {
+        tbody.querySelectorAll('tr:not(.detail-row)').forEach(function (row) {
             var dateEl    = row.querySelector('input[name="last_update"]');
             var contentEl = row.querySelector('textarea[name="content"]');
+            var detail    = detailRowOf(row);
+            var textEl    = detail ? detail.querySelector('textarea[name="text"]') : null;
             records.push({
                 date:  dateEl ? dateEl.value.trim() : '',
-                title: contentEl ? contentEl.value.trim() : ''
+                title: contentEl ? contentEl.value.trim() : '',
+                text:  textEl ? textEl.value.trim() : ''
             });
         });
         return records;

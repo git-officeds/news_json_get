@@ -58,9 +58,10 @@ foreach ($data as $row) {
 
     $date  = trim((string)($row['date'] ?? ''));
     $title = trim((string)($row['title'] ?? ''));
+    $text  = trim((string)($row['text'] ?? ''));
 
-    // 日付・内容ともに空の行は無視（未入力の追加行など）
-    if ($date === '' && $title === '') {
+    // 日付・内容・詳細すべて空の行は無視（未入力の追加行など）
+    if ($date === '' && $title === '' && $text === '') {
         continue;
     }
 
@@ -78,7 +79,12 @@ foreach ($data as $row) {
         respond(false, '内容が長すぎる行があります（500文字以内）。', 422);
     }
 
-    $records[] = ['date' => $date, 'title' => $title];
+    // 詳細本文チェック（任意項目）
+    if (mb_strlen($text) > 5000) {
+        respond(false, '詳細本文が長すぎる行があります（5000文字以内）。', 422);
+    }
+
+    $records[] = ['date' => $date, 'title' => $title, 'text' => $text];
 }
 
 // 日付の新しい順（降順）に整列してから保存

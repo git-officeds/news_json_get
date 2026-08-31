@@ -84,12 +84,32 @@
                         <th><input type="button" name="save" value="すべて選択"></th><th>削除</th><th>日付</th><th>内容</th>
                     </tr></thead>
                     <tbody id="news_tbody">
-                        <?php foreach($lists as $list){ ?>
+                        <?php foreach($lists as $list){
+                            $row_text = isset($list['text']) ? (string)$list['text'] : '';
+                            $has_text = trim($row_text) !== '';
+                        ?>
                         <tr>
                             <td><input type="checkbox" name="select"></td>
                             <td><button type="button" name="delete"><img src="./images/trush.png" alt="削除"></button></td>
                             <td><input type="date" name="last_update" value="<?php echo htmlspecialchars($list['date'], ENT_QUOTES, 'UTF-8'); ?>"></td>
-                            <td><textarea name="content"><?php echo htmlspecialchars($list['title'], ENT_QUOTES, 'UTF-8'); ?></textarea></td>
+                            <td class="content-cell">
+                                <textarea name="content"><?php echo htmlspecialchars($list['title'], ENT_QUOTES, 'UTF-8'); ?></textarea>
+                                <button type="button" class="detail-toggle<?php echo $has_text ? ' detail-toggle--filled' : ''; ?>" aria-expanded="false" title="詳細本文を編集">
+                                    <span class="detail-toggle__mark" aria-hidden="true"></span>詳細
+                                </button>
+                            </td>
+                        </tr>
+                        <tr class="detail-row">
+                            <td colspan="4">
+                                <div class="detail-row__collapse">
+                                    <div class="detail-row__inner">
+                                        <label class="detail-field">
+                                            <span class="detail-field__label">詳細本文</span>
+                                            <textarea name="text" rows="4" placeholder="お知らせの詳細（本文）を入力"><?php echo htmlspecialchars($row_text, ENT_QUOTES, 'UTF-8'); ?></textarea>
+                                        </label>
+                                    </div>
+                                </div>
+                            </td>
                         </tr>
                         <?php } ?>
                     </tbody>

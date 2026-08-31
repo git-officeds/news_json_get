@@ -29,45 +29,136 @@ main > h3{
     padding: 0 15px;
 }
 
-#news dl{
-    align-items: center;
+#news-list{
     margin: 0;
     border-top: 1px solid #e3e8ec;
 }
 
-/* 1件 = dt + dd を横並びの行に */
-#news dt,
-#news dd{
-    padding: 6px 4px;
+/* 1件 = dt（日付）＋ dd.news-summary（本文見出し）＋ dd.news-detail（ドロップダウン） */
+.news-item{
+    display: grid;
+    grid-template-columns: 8em 1fr;
+    align-items: start;
     border-bottom: 1px solid #e3e8ec;
+    transition: background-color .15s ease;
 }
 
-#news dt{
-    float: left;
-    width: 8em;
+.news-item > dt{
+    padding: 10px 4px;
     color: #6b7785;
     font-size: 14px;
     font-feature-settings: "tnum";
     font-variant-numeric: tabular-nums;
-    border-bottom: none;
 }
 
-#news dd{
+.news-summary{
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
     margin: 0;
+    padding: 10px 4px;
     font-size: 15px;
-
 }
 
-#news dd::after{
-    content: "";
-    display: block;
-    clear: both;
+.news-item[data-expandable] > .news-summary{
+    cursor: pointer;
 }
 
-/* 行ホバー（dd 側にだけ背景がつかないよう視覚上の行を意識） */
-#news dl > dt:hover,
-#news dl > dt:hover + dd{
+.news-item[data-expandable]:hover{
     background-color: #f7f9fb;
+}
+
+.news-summary:focus-visible{
+    outline: 2px solid #1f2d3d;
+    outline-offset: 2px;
+}
+
+/* ----- 開閉インジケーター（＋／−ボタン） ----- */
+.news-toggle{
+    position: relative;
+    flex: 0 0 auto;
+    width: 20px;
+    height: 20px;
+    margin-top: .1em;
+    border: 1px solid #c2ccd6;
+    border-radius: 50%;
+    transition: transform .25s ease, border-color .15s ease, background-color .15s ease;
+}
+
+.news-toggle::before,
+.news-toggle::after{
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 10px;
+    height: 2px;
+    background-color: #6b7785;
+    transform: translate(-50%, -50%);
+    transition: opacity .2s ease, background-color .15s ease;
+}
+
+.news-toggle::after{
+    transform: translate(-50%, -50%) rotate(90deg);
+}
+
+.news-item[data-expandable]:hover .news-toggle{
+    border-color: #1f2d3d;
+    background-color: #1f2d3d;
+}
+
+.news-item[data-expandable]:hover .news-toggle::before,
+.news-item[data-expandable]:hover .news-toggle::after{
+    background-color: #fff;
+}
+
+.news-item.is-open .news-toggle{
+    transform: rotate(180deg);
+}
+
+/* 開いているときは縦棒を消して「−」にする */
+.news-item.is-open .news-toggle::after{
+    opacity: 0;
+}
+
+/* ----- ドロップダウン本文（スムーズ開閉） ----- */
+.news-detail{
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-rows: 0fr;
+    margin: 0;
+    transition: grid-template-rows .28s ease;
+}
+
+.news-item.is-open .news-detail{
+    grid-template-rows: 1fr;
+}
+
+.news-detail-inner{
+    overflow: hidden;
+    min-height: 0;
+    padding: 0 4px;
+    font-size: 14px;
+    line-height: 1.9;
+    color: #55606b;
+    opacity: 0;
+    transition: opacity .2s ease, padding .28s ease;
+}
+
+.news-item.is-open .news-detail-inner{
+    padding: 2px 4px 16px;
+    opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce){
+    .news-detail,
+    .news-detail-inner,
+    .news-toggle,
+    .news-toggle::before,
+    .news-toggle::after{
+        transition: none;
+    }
 }
 
 /* ----- 「もっと見る」ボタン ----- */
@@ -118,18 +209,17 @@ main > h3{
         margin-top: 28px;
         font-size: 18px;
     }
-    #news dt,
-    #news dd{
-        float: none;
-        width: auto;
-        padding: 12px 4px;
+    .news-item{
+        grid-template-columns: 1fr;
+        padding: 6px 0;
     }
-    #news dt{
-        border-bottom: none;
-        padding-bottom: 2px;
+    .news-item > dt{
+        padding: 6px 4px 0;
     }
-    #news dd{
-        padding-top: 0px;
-        padding-left: 4px;
+    .news-summary{
+        padding: 2px 4px 8px;
+    }
+    .news-item.is-open .news-detail-inner{
+        padding-bottom: 12px;
     }
 }

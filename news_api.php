@@ -7,7 +7,7 @@
  *   limit  : 取得件数（既定 5、最大 50）
  *
  * レスポンス(JSON):
- *   { "items": [ { "date": "...", "title": "...", "date_label": "..." } ],
+ *   { "items": [ { "date": "...", "title": "...", "text": "...", "date_label": "..." } ],
  *     "total": 20, "has_more": true }
  */
 
@@ -34,11 +34,13 @@ $result = news_load_slice($offset, $limit);
 $items = array_map(static function ($item) {
     $date  = (string)($item['date'] ?? '');
     $title = (string)($item['title'] ?? '');
+    $text  = trim((string)($item['text'] ?? ''));
     $ts    = strtotime($date);
 
     return [
         'date'       => $date,
         'title'      => $title,
+        'text'       => $text,
         'date_label' => $ts !== false ? date('Y-m-d', $ts) : $date,
     ];
 }, $result['items']);

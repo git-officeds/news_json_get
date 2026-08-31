@@ -54,10 +54,26 @@
         <h3>お知らせ</h3>
         <section id="news">
             <dl id="news-list">
-            <?php foreach($lists as $list){ ?>
-                <dt><time datetime="<?php echo htmlspecialchars($list['date'], ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars($list['date'], ENT_QUOTES, 'UTF-8'); ?></time></dt>
-                <dd><?php echo htmlspecialchars($list['title'], ENT_QUOTES, 'UTF-8'); ?></dd>
-            <?php } ?>
+            <?php foreach($lists as $list): ?>
+                <?php
+                    $date     = htmlspecialchars($list['date'], ENT_QUOTES, 'UTF-8');
+                    $title    = htmlspecialchars($list['title'], ENT_QUOTES, 'UTF-8');
+                    $text     = isset($list['text']) ? trim((string)$list['text']) : '';
+                    $has_text = ($text !== '');
+                ?>
+                <div class="news-item"<?php echo $has_text ? ' data-expandable="1"' : ''; ?>>
+                    <dt><time datetime="<?php echo $date; ?>"><?php echo $date; ?></time></dt>
+                    <dd class="news-summary"<?php echo $has_text ? ' role="button" tabindex="0" aria-expanded="false"' : ''; ?>>
+                        <span class="news-title"><?php echo $title; ?></span>
+                        <?php if ($has_text): ?><span class="news-toggle" aria-hidden="true"></span><?php endif; ?>
+                    </dd>
+                    <?php if ($has_text): ?>
+                    <dd class="news-detail">
+                        <div class="news-detail-inner"><?php echo nl2br(htmlspecialchars($text, ENT_QUOTES, 'UTF-8')); ?></div>
+                    </dd>
+                    <?php endif; ?>
+                </div>
+            <?php endforeach; ?>
             </dl>
 
             <div class="news-more"<?php echo $has_more ? '' : ' hidden'; ?>>
