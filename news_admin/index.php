@@ -73,6 +73,7 @@
                 <button type="button" name="add">項目を追加</button>
                 <button type="button" name="all_submit" disabled>現在の状態で保存</button>
                 <button type="button" name="all_delete">選択した項目を削除</button>
+                <button type="button" name="reload">すべてやり直す</button>
             </div>
         </section>
 

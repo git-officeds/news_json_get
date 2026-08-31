@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', function () {
     var addBtn    = document.querySelector('#control_area button[name="add"]');
     var submitBtn = document.querySelector('#control_area button[name="all_submit"]');
     var delBtn    = document.querySelector('#control_area button[name="all_delete"]');
+    var reloadBtn = document.querySelector('#control_area button[name="reload"]');
     var popup     = document.getElementById('save_popup');
     var popupText = document.getElementById('save_popup_text');
     var popupClose = popup ? popup.querySelector('.popup__close') : null;
@@ -133,6 +134,20 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         });
         return records;
+    }
+
+    // 「すべてやり直す」: 画面を再読み込みし、保存済みの状態に戻す
+    if (reloadBtn) {
+        reloadBtn.addEventListener('click', function () {
+            // 未保存の変更がある場合は確認（保存ボタンが押せる＝未保存）
+            var dirty = submitBtn && !submitBtn.disabled;
+            if (dirty && !window.confirm('保存していない変更は破棄されます。すべてやり直しますか？')) {
+                return;
+            }
+            reloadBtn.disabled = true;
+            reloadBtn.classList.add('is-loading');
+            window.location.reload();
+        });
     }
 
     // 「現在の状態で保存」: テーブル全体を news.json へ上書き保存（非同期）

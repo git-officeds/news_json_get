@@ -115,10 +115,31 @@ input[type="button"]:focus-visible{
     background-color: #c0392b;
 }
 
+/* やり直す（リロード）系 */
+#control_area button[name="reload"]{
+    background-color: #5d6d7e;
+}
+#control_area button[name="reload"]:hover{
+    background-color: #4a5866;
+}
+#control_area button[name="reload"]::before{
+    content: "\21bb";           /* ↻ リロードアイコン */
+    margin-right: 6px;
+    font-size: 15px;
+    line-height: 1;
+}
+
 /* 保存中 */
 #control_area button.is-loading{
     cursor: progress;
     opacity: .7;
+}
+#control_area button[name="reload"].is-loading::before{
+    animation: reload-spin .8s linear infinite;
+}
+
+@keyframes reload-spin{
+    to{ transform: rotate(360deg); }
 }
 
 /* ----- 保存結果ポップアップ ----- */
