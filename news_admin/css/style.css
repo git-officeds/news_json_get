@@ -142,6 +142,70 @@ input[type="button"]:focus-visible{
     to{ transform: rotate(360deg); }
 }
 
+/* ----- フローティング保存ボタン（編集時に表示） ----- */
+.fab-save{
+    position: fixed;
+    right: 24px;
+    bottom: 24px;
+    z-index: 900;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 22px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #fff;
+    background-color: #27ae60;
+    border: none;
+    border-radius: 999px;
+    box-shadow: 0 6px 20px rgba(39, 174, 96, .4);
+    cursor: pointer;
+    transition: background-color .15s ease, box-shadow .15s ease, transform .15s ease;
+    animation: fab-in .2s ease;
+}
+
+.fab-save[hidden]{
+    display: none;
+}
+
+.fab-save:hover{
+    background-color: #1e8c4d;
+    box-shadow: 0 8px 24px rgba(39, 174, 96, .5);
+}
+
+.fab-save:active{
+    transform: translateY(1px);
+}
+
+.fab-save:focus-visible{
+    outline: 2px solid #145a32;
+    outline-offset: 2px;
+}
+
+.fab-save.is-loading{
+    cursor: progress;
+    opacity: .75;
+}
+
+.fab-save__icon{
+    font-size: 16px;
+    line-height: 1;
+}
+
+@keyframes fab-in{
+    from{ opacity: 0; transform: translateY(12px); }
+    to{ opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 575px){
+    .fab-save{
+        right: 16px;
+        bottom: 16px;
+        left: 16px;
+        justify-content: center;
+    }
+}
+
 /* ----- 保存結果ポップアップ ----- */
 .popup{
     position: fixed;

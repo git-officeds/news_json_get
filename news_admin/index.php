@@ -105,6 +105,11 @@
         </div>
     </footer>
 
+    <!-- 編集時に表示されるフローティング保存ボタン -->
+    <button type="button" id="fab_save" class="fab-save" hidden>
+        <span class="fab-save__icon" aria-hidden="true">&#128190;</span>現在の状態で保存
+    </button>
+
     <!-- 保存結果ポップアップ -->
     <div id="save_popup" class="popup" role="alertdialog" aria-live="assertive" aria-labelledby="save_popup_text" hidden>
         <p id="save_popup_text" class="popup__text"></p>

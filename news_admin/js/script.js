@@ -9,6 +9,7 @@ document.addEventListener('DOMContentLoaded', function () {
     var submitBtn = document.querySelector('#control_area button[name="all_submit"]');
     var delBtn    = document.querySelector('#control_area button[name="all_delete"]');
     var reloadBtn = document.querySelector('#control_area button[name="reload"]');
+    var fabSave   = document.getElementById('fab_save');
     var popup     = document.getElementById('save_popup');
     var popupText = document.getElementById('save_popup_text');
     var popupClose = popup ? popup.querySelector('.popup__close') : null;
@@ -17,10 +18,19 @@ document.addEventListener('DOMContentLoaded', function () {
     if (!addBtn || !tbody) return;
 
     /**
-     * 「現在の状態で保存」ボタンを有効化する
+     * 編集された状態にする（保存ボタンを有効化し、フローティング保存ボタンを表示）
      */
     function enableSubmit() {
         if (submitBtn) submitBtn.disabled = false;
+        if (fabSave) fabSave.hidden = false;
+    }
+
+    /**
+     * 未編集の状態に戻す（保存ボタンを無効化し、フローティング保存ボタンを隠す）
+     */
+    function markSaved() {
+        if (submitBtn) submitBtn.disabled = true;
+        if (fabSave) fabSave.hidden = true;
     }
 
     /**
@@ -150,46 +160,73 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // 「現在の状態で保存」: テーブル全体を news.json へ上書き保存（非同期）
+    var saving = false;
+
+    /**
+     * テーブル全体を news.json へ上書き保存する（非同期）
+     * 「現在の状態で保存」ボタンとフローティング保存ボタンで共通利用。
+     */
+    function doSave() {
+        if (saving) return;
+
+        // 保存前にワンクッション確認
+        if (!window.confirm('現在のテーブルの内容で news.json を上書き保存します。よろしいですか？')) {
+            return;
+        }
+
+        saving = true;
+
+        var records = collectRecords();
+
+        if (submitBtn) {
+            submitBtn.disabled = true;              // 二重送信防止
+            submitBtn.classList.add('is-loading');
+        }
+        if (fabSave) fabSave.classList.add('is-loading');
+        showMessage('', '');
+
+        fetch('save.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(records)
+        })
+            .then(function (res) {
+                return res.json()
+                    .catch(function () { return null; })
+                    .then(function (body) { return { ok: res.ok, body: body }; });
+            })
+            .then(function (r) {
+                if (r.ok && r.body && r.body.success) {
+                    // 成功: 未編集状態に戻し、成功メッセージ
+                    markSaved();
+                    showMessage('success', r.body.message || '保存しました。');
+                } else {
+                    // 失敗: 再度保存できるよう編集状態を維持、失敗メッセージ
+                    enableSubmit();
+                    showMessage('error', (r.body && r.body.message) || '保存に失敗しました。');
+                }
+            })
+            .catch(function () {
+                enableSubmit();
+                showMessage('error', '通信エラーにより保存に失敗しました。');
+            })
+            .finally(function () {
+                saving = false;
+                if (submitBtn) submitBtn.classList.remove('is-loading');
+                if (fabSave) fabSave.classList.remove('is-loading');
+            });
+    }
+
     if (submitBtn) {
         submitBtn.addEventListener('click', function () {
             if (submitBtn.disabled) return;
-
-            var records = collectRecords();
-
-            submitBtn.disabled = true;              // 二重送信防止
-            submitBtn.classList.add('is-loading');
-            showMessage('', '');
-
-            fetch('save.php', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(records)
-            })
-                .then(function (res) {
-                    return res.json()
-                        .catch(function () { return null; })
-                        .then(function (body) { return { ok: res.ok, body: body }; });
-                })
-                .then(function (r) {
-                    if (r.ok && r.body && r.body.success) {
-                        // 成功: disabled を付与したまま、成功メッセージ
-                        submitBtn.disabled = true;
-                        showMessage('success', r.body.message || '保存しました。');
-                    } else {
-                        // 失敗: 再度保存できるよう有効化、失敗メッセージ
-                        submitBtn.disabled = false;
-                        showMessage('error', (r.body && r.body.message) || '保存に失敗しました。');
-                    }
-                })
-                .catch(function () {
-                    submitBtn.disabled = false;
-                    showMessage('error', '通信エラーにより保存に失敗しました。');
-                })
-                .finally(function () {
-                    submitBtn.classList.remove('is-loading');
-                });
+            doSave();
         });
+    }
+
+    // 編集時に表示されるフローティング保存ボタン
+    if (fabSave) {
+        fabSave.addEventListener('click', doSave);
     }
 
 });
