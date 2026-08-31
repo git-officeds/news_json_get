@@ -1,0 +1,36 @@
+# ============================================================
+# news_admin ディレクトリ アクセス制限（Basic認証）
+# ============================================================
+#
+# 【設置時に必ず修正してください】
+#   下記 AuthUserFile のパスを、サーバー上の .htpasswd の
+#   「絶対パス」に書き換えてください。
+#   例）/home/xxxxxxxx/www/news_admin/.htpasswd
+#
+#   絶対パスが分からない場合は、news_admin 内に以下のPHPを
+#   一時的に置いて確認できます:
+#     <?php echo __DIR__; ?>
+#
+#   ロリポップ等の一部レンタルサーバーでは相対パス指定
+#   （AuthUserFile ".htpasswd"）が使える場合もあります。
+# ============================================================
+
+AuthType Basic
+AuthName "News Admin - Restricted Area"
+AuthUserFile "C:/xampp/htdocs/news_ui/news_admin/.htpasswd"
+Require valid-user
+
+# ------------------------------------------------------------
+# .htaccess / .htpasswd への直接アクセスを禁止
+# ------------------------------------------------------------
+<FilesMatch "^\.ht">
+    # Apache 2.4
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    # Apache 2.2
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
+</FilesMatch>

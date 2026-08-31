@@ -1,0 +1,135 @@
+@charset "UTF-8";
+
+/* =========================================================
+   お知らせ（NEWS）セクション
+   ========================================================= */
+
+main{
+    font-family: "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic", "Meiryo", system-ui, sans-serif;
+    color: #333;
+    line-height: 1.7;
+}
+
+/* ----- 見出し ----- */
+main > h3{
+    max-width: 720px;
+    margin: 40px auto 16px;
+    padding: 0 15px 8px;
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: .06em;
+    color: #1f2d3d;
+    border-bottom: 2px solid #1f2d3d;
+}
+
+/* ----- お知らせリスト ----- */
+#news{
+    max-width: 720px;
+    margin: 0 auto 48px;
+    padding: 0 15px;
+}
+
+#news dl{
+    align-items: center;
+    margin: 0;
+    border-top: 1px solid #e3e8ec;
+}
+
+/* 1件 = dt + dd を横並びの行に */
+#news dt,
+#news dd{
+    padding: 6px 4px;
+    border-bottom: 1px solid #e3e8ec;
+}
+
+#news dt{
+    float: left;
+    width: 8em;
+    color: #6b7785;
+    font-size: 14px;
+    font-feature-settings: "tnum";
+    font-variant-numeric: tabular-nums;
+    border-bottom: none;
+}
+
+#news dd{
+    margin: 0;
+    font-size: 15px;
+
+}
+
+#news dd::after{
+    content: "";
+    display: block;
+    clear: both;
+}
+
+/* 行ホバー（dd 側にだけ背景がつかないよう視覚上の行を意識） */
+#news dl > dt:hover,
+#news dl > dt:hover + dd{
+    background-color: #f7f9fb;
+}
+
+/* ----- 「もっと見る」ボタン ----- */
+.news-more{
+    margin-top: 20px;
+    text-align: center;
+}
+
+.news-more[hidden]{
+    display: none;
+}
+
+#news-more-btn{
+    display: inline-block;
+    padding: 10px 32px;
+    font-size: 14px;
+    font-family: inherit;
+    color: #1f2d3d;
+    background-color: #fff;
+    border: 1px solid #1f2d3d;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: background-color .15s ease, color .15s ease;
+}
+
+#news-more-btn:hover{
+    color: #fff;
+    background-color: #1f2d3d;
+}
+
+#news-more-btn:focus-visible{
+    outline: 2px solid #1f2d3d;
+    outline-offset: 2px;
+}
+
+#news-more-btn:disabled{
+    cursor: default;
+    opacity: .6;
+}
+
+#news-more-btn.is-loading{
+    cursor: progress;
+}
+
+/* ----- レスポンシブ ----- */
+@media (max-width: 575px){
+    main > h3{
+        margin-top: 28px;
+        font-size: 18px;
+    }
+    #news dt,
+    #news dd{
+        float: none;
+        width: auto;
+        padding: 12px 4px;
+    }
+    #news dt{
+        border-bottom: none;
+        padding-bottom: 2px;
+    }
+    #news dd{
+        padding-top: 0px;
+        padding-left: 4px;
+    }
+}
