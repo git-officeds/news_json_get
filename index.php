@@ -69,7 +69,7 @@
                     </dd>
                     <?php if ($has_text): ?>
                     <dd class="news-detail">
-                        <div class="news-detail-inner"><?php echo nl2br(htmlspecialchars($text, ENT_QUOTES, 'UTF-8')); ?></div>
+                        <div class="news-detail-inner"><?php echo news_text_to_html($text); ?></div>
                     </dd>
                     <?php endif; ?>
                 </div>

@@ -17,6 +17,45 @@ document.addEventListener('DOMContentLoaded', function () {
         return esc(str).replace(/\r\n|\r|\n/g, '<br>');
     }
 
+    /**
+     * 詳細本文を表示用HTMLへ変換する（index.php の news_text_to_html と同等）。
+     * - HTML特殊文字をエスケープ
+     * - 改行を <br> に変換
+     * - 文中の URL を別タブで開く <a> リンクに変換
+     */
+    function textToHtml(raw) {
+        var pattern = /(?:^|[^\w@/])((?:https?:\/\/|www\.)[-A-Za-z0-9._~:/?#[\]@!$&()+,;=%]+)/gi;
+        var out = '';
+        var last = 0;
+        var m;
+
+        while ((m = pattern.exec(raw)) !== null) {
+            var url = m[1];
+            var pos = m.index + m[0].length - url.length;   // URL 本体の開始位置
+
+            out += nl2br(raw.slice(last, pos));
+
+            // 末尾の句読点・閉じ括弧は URL に含めない
+            var trail = '';
+            while (url && '.,;:!?)]}'.indexOf(url.charAt(url.length - 1)) !== -1) {
+                trail = url.charAt(url.length - 1) + trail;
+                url = url.slice(0, -1);
+            }
+
+            if (url) {
+                var href = /^www\./i.test(url) ? 'https://' + url : url;
+                out += '<a href="' + esc(href) + '" target="_blank" rel="noopener noreferrer">' +
+                    esc(url) + '</a>';
+            }
+            out += esc(trail);
+
+            last = pos + m[1].length;
+        }
+
+        out += nl2br(raw.slice(last));
+        return out;
+    }
+
     /****************************************
       行クリックでドロップダウン開閉（イベント委譲）
     ****************************************/
